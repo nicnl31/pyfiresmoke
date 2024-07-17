@@ -57,11 +57,21 @@ namespace ANSCENTER {
 		long unsigned int counter;	/* Number of frames from the first frame (offset), 0-based index */
 	};
 
+	/*
+	NOTE:
+		- First of the pair is the lower threshold and second of the pair is the upper
+		threshold. 
+	*/
+	typedef std::pair<cv::Scalar, cv::Scalar> Range;
+
 	class ANSCV_API ANSFireDetector {
 	private:
 		double _hsvThreshold;
 		MoveDetect::Handler _handler;
 		long unsigned int _counter;
+
+		std::vector<Range> _smoke_colour;
+		std::vector<Range> _fire_colour;
 
 		/*
 		PURPOSE:
@@ -71,29 +81,21 @@ namespace ANSCENTER {
 
 		/*
 		PURPOSE:
-			- Filters the HSV threshold of fire (hard-coded values inside the func-
-			tion). This function returns a Boolean that denotes whether the fire col-
-			our is detected given the threshold. It also changes the frame argument
-			by masking it.
-
-		ARGUMENTS:
-			- The `area_threshold` argument is the percentage of the total area that
-			contains the fire colour.
+			- Given a `lower` and an `upper` limit, the method determines whether the frame
+			(or cropped frame) contains the colours within a `range` and if the ratio of
+			total number of pixels within `range` against the total area of the frame is
+			greater than `area_threshold`.
 		*/
-		bool FireColourInFrame(cv::Mat* frame, float area_threshold = 0.5);
+		bool MajorityColourInFrame(cv::Mat frame, Range range, float area_threshold = 0.8);
 
 		/*
 		PURPOSE:
-			- Filters the HSV threshold of smoke (hard-coded values inside the func-
-			tion). This function returns a Boolean that denotes whether the smoke col-
-			our is detected given the threshold. It also changes the frame argument
-			by masking it.
-
-		ARGUMENTS:
-			- The `area_threshold` argument is the percentage of the total area that
-			contains the smoke colour.
+			- An overload of the function with the same name. This method is similar to the
+			previous method. Only it compounds multiple colours and determines if the colours
+			to total area ratio meets the `area_threshold`.
 		*/
-		bool SmokeColourInFrame(cv::Mat* frame, float area_threshold = 0.4);
+		bool MajorityColourInFrame(cv::Mat frame, std::vector<Range> ranges, 
+			float area_threshold = 0.8);
 
 		/*
 		PURPOSE:

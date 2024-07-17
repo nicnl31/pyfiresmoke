@@ -12,10 +12,22 @@ namespace ANSCENTER {
 
 		/*
 		NOTE:
-			- PSNR value set to 50.0 for more subtle movement detection.
+			- Defining the colour ranges for fire and smoke.
+		*/
+		this->_fire_colour.push_back(std::pair(
+			cv::Scalar(0, 0, 200), cv::Scalar(255, 255, 255)) // 0,0,179 -> 255, 255, 255
+		);
+
+		this->_smoke_colour.push_back(std::pair(
+			cv::Scalar(0, 0, 51), cv::Scalar(180, 128, 204)) // 0,0,0 -> 255, 255, 127
+		);
+		
+		/*
+		NOTE:
+			- PSNR value set to high for more subtle movement detection.
 		*/
 		this->_handler = MoveDetect::Handler();
-		this->_handler.psnr_threshold = 50.0;
+		this->_handler.psnr_threshold = 45.0;
 		this->_counter = 0;
 	}
 
@@ -81,9 +93,9 @@ namespace ANSCENTER {
 				to copy to `cropped` again because the methods used below modify
 				the frames.
 			*/
-			bool fcol = this->FireColourInFrame(&cropped);
-			cropped = input(box);
-			bool scol = this->SmokeColourInFrame(&cropped);
+
+			bool fcol_detected = this->MajorityColourInFrame(cropped, this->_fire_colour, 0.15);
+			bool scol_detected = this->MajorityColourInFrame(cropped, this->_smoke_colour);
 
 			/*
 			NOTE:
@@ -91,15 +103,14 @@ namespace ANSCENTER {
 				look into smoke colour method of detection as it empirically creates
 				a lot of false positives.
 			*/
-			if (fcol || scol) {
+			if (fcol_detected || scol_detected) {
 				Object object;
 				this->InitializeObject(&object);
 
-				if (fcol) {
+				if (fcol_detected) {
 					object.classId = FIRE;
 					object.className = "Fire";
-				}
-				else if(scol) {
+				}else if(scol_detected) {
 					object.classId = SMOKE;
 					object.className = "Smoke";
 				}
@@ -109,10 +120,10 @@ namespace ANSCENTER {
 
 				/*
 				NOTE:
-					- Anything less than 5% of the frame's total area gets ignored and
+					- Anything less than THRESHOLD % of the frame's total area gets ignored and
 					discarded. This is to avoid too many unwanted ROIs.
 				*/
-				const float SMALL_ROI_FILTER_THRESHOLD = 0.05;
+				const float SMALL_ROI_FILTER_THRESHOLD = 0.02;
 				if (float((float) (object.box.width * object.box.height) / 
 					(float)(input.rows * input.cols)) < SMALL_ROI_FILTER_THRESHOLD) {
 
@@ -139,8 +150,7 @@ namespace ANSCENTER {
 			*/
 			if (objects[i].classId == FIRE) {
 				box_colour = cv::Scalar(255, 127, 127);
-			}
-			else if (objects[i].classId == SMOKE) {
+			} else if (objects[i].classId == SMOKE) {
 				box_colour = cv::Scalar(255, 127, 255);
 			}
 
@@ -341,77 +351,66 @@ namespace ANSCENTER {
 		return box;
 	}
 
-	bool ANSFireDetector::FireColourInFrame(cv::Mat* frame, float area_threshold)
+	bool ANSFireDetector::MajorityColourInFrame(cv::Mat frame, Range range, float area_threshold)
 	{
 		/*
 		NOTE:
-			- Create lower bound and upper bound of fire colour.
+			- Try catch memory leak when all frames are read.
 		*/
-		const int hmin = 18, smin = 50, vmin = 50;
-		const int hmax = 35, smax = 255, vmax = 255;
 
-		/*
-		NOTE:
-			- Try catch memory leak when all frame are read.
-		*/
+		cv::Mat img_hsv;
 		try {
 			/*
 			NOTE:
 				- Convert colour into gray colour.
 			*/
-			cv::Mat imgHSV;
-			cv::cvtColor(*frame, imgHSV, cv::COLOR_BGR2HSV);
+			cv::cvtColor(frame, img_hsv, cv::COLOR_BGR2HSV);
+
 			/*
 			NOTE:
-				- Scalar is redefined by `typedef`. Original class name is `cv::Scalar_`
-				for documentation purposes.
+				- The first of the redefined `Range` pair is always the lower
+				threshold and the second is the upper threshold.
 			*/
-			cv::Scalar lower = cv::Scalar(hmin, smin, vmin);
-			cv::Scalar upper = cv::Scalar(hmax, smax, vmax);
-			cv::inRange(imgHSV, lower, upper, *frame);
+			cv::inRange(img_hsv, range.first, range.second, frame);
 		}
 		catch (cv::Exception& e) {
 			return false;
 		}
 
-		return (cv::countNonZero(*frame) / frame->rows * frame->cols) > area_threshold;
-
+		return (cv::countNonZero(frame) / (frame.rows * frame.cols)) > area_threshold;
 	}
 
-	bool ANSFireDetector::SmokeColourInFrame(cv::Mat* frame, float area_threshold)
+	bool ANSFireDetector::MajorityColourInFrame(cv::Mat frame, std::vector<Range> ranges, float area_threshold)
 	{
 		/*
 		NOTE:
-			- Create lower bound and upper bound of fire colour.
+			- Try catch memory leak when all frames are read.
 		*/
-		const int hmin = 0, smin = 0, vmin = 40;
-		const int hmax = 179, smax = 255, vmax = 255;
+		unsigned int current_area = 0;
 
-		/*
-		NOTE:
-			- Try catch memory leak when all frame are read.
-		*/
+		cv::Mat img_hsv;
 		try {
 			/*
 			NOTE:
 				- Convert colour into gray colour.
 			*/
-			cv::Mat imgHSV;
-			cv::cvtColor(*frame, imgHSV, cv::COLOR_BGR2HSV);
+			cv::cvtColor(frame, img_hsv, cv::COLOR_BGR2HSV);
+
 			/*
 			NOTE:
-				- Scalar is redefined by `typedef`. Original class name is `cv::Scalar_`
-				for documentation purposes.
+				- The first of the redefined `Range` pair is always the lower
+				threshold and the second is the upper threshold.
 			*/
-			cv::Scalar lower = cv::Scalar(hmin, smin, vmin);
-			cv::Scalar upper = cv::Scalar(hmax, smax, vmax);
-			cv::inRange(imgHSV, lower, upper, *frame);
+			for (const Range &range : ranges) {
+				cv::inRange(img_hsv, range.first, range.second, frame);
+				current_area += cv::countNonZero(frame);
+			}
 		}
 		catch (cv::Exception& e) {
 			return false;
 		}
 
-		return (cv::countNonZero(*frame) / frame->rows * frame->cols) > area_threshold;
+		return (float)current_area / ((float)frame.rows * frame.cols) > area_threshold;
 	}
 
 	void ANSFireDetector::InitializeObject(Object* object) {
