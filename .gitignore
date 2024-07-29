@@ -75,8 +75,18 @@ ANSCVProject/x64/Release/ANSCVProject.lib
 
 # All the other folders and file extensions 
 .vs/
+.venv/
+.idea/
+.ipynb_checkpoints/
 *.dll
 *.lib
 *.mp4
 *.csv
 *.m4v
+*.jpg
+*.jpeg
+*.png
+*.xml
+*.txt
+*.json
+*.ipynb
