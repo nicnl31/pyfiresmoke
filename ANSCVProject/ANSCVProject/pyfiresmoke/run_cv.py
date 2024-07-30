@@ -41,7 +41,7 @@ import pandas as pd
 from sklearn.preprocessing import StandardScaler
 
 from training.cv import NeuralNetworkCrossValidator
-from ANSCVProject.ANSCVProject.pyfiresmoke.utils import parse
+from utils import parse
 from models.ann import ANN
 
 # ==============================================================================
@@ -67,7 +67,7 @@ DROPOUT_RATES = [0.0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3]
 ACTIVATION_FUNCTIONS = ["relu", "prelu", "silu", "selu", "tanh", "relu6", "hardswish"]
 LRS = [1e-2, 1e-3, 1e-4]
 BATCH_SIZES = [64, 128, 256]
-N_EPOCHS = [175]
+N_EPOCHS = [300]
 
 N_CV_SPLITS = 10
 

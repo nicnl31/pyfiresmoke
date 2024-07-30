@@ -1,6 +1,6 @@
 """
 This library creates the full dataset based on the row-wise feature extractor
-from extractor.py.
+from extract.py.
 
 It operates by:
 	-   Taking as input a single image file (e.g. img1.jpg) and a corresponding
@@ -32,7 +32,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import hsv_to_rgb
 
-from extractor import HaralickFeatureExtractor
+from .extract import HaralickFeatureExtractor
 from utils import to_array
 
 

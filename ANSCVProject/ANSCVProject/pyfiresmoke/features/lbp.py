@@ -1,6 +1,6 @@
 from skimage import feature
 import numpy as np
-from utils.utils import to_grayscale
+from utils import to_grayscale
 
 
 class LocalBinaryPatterns(object):

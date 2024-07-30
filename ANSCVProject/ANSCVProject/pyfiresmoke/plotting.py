@@ -2,7 +2,7 @@ from typing import Any
 
 import matplotlib.pyplot as plt
 from sklearn.metrics import ConfusionMatrixDisplay
-from ANSCVProject.ANSCVProject.pyfiresmoke.base import BasePlotter, BaseSaver
+from base import BasePlotter, BaseSaver
 
 
 class NeuralNetworkPlotSaver(BaseSaver):

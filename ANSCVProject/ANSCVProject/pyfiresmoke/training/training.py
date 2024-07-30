@@ -11,7 +11,7 @@ import torch.optim as optim
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import DataLoader
 
-from base.base import BaseTrainer
+from base import BaseTrainer
 
 
 class NeuralNetworkModelSaver(object):
@@ -155,10 +155,10 @@ class NeuralNetworkTrainer(BaseTrainer):
 		will reduce the learning rate
 		"""
 		return ReduceLROnPlateau(optimizer, mode='min', threshold=1e-4,
-								 threshold_mode='rel', factor=1e-1, patience=5,
+								 threshold_mode='rel', factor=1e-1, patience=10,
 								 min_lr=1e-8)
 
-	def _get_early_stopper(self, patience=10, delta=1e-4):
+	def _get_early_stopper(self, patience=10, delta=1e-6):
 		return NeuralNetworkEarlyStoppingValidator(patience, delta)
 
 	def _get_model_saver(self, model, checkpoints_path):

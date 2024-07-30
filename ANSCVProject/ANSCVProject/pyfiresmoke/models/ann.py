@@ -1,7 +1,7 @@
 import torch.nn as nn
 from torch.nn.modules.container import ModuleList
 
-from mapper.mapper import StringToFunctionMapper
+from mapper import StringToFunctionMapper
 
 
 class ANN(nn.Module):

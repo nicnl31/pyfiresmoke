@@ -16,6 +16,7 @@ The outputs are:
         - Prediction time
         - Total time (from vector generation to prediction)
 """
+import os
 import time
 import uuid
 import json
@@ -28,9 +29,9 @@ import torch
 import torch.nn as nn
 import matplotlib.pyplot as plt
 
-from ANSCVProject.ANSCVProject.pyfiresmoke.utils import crop
-from extractor.extractor import HaralickFeatureExtractor
-from ANSCVProject.ANSCVProject.pyfiresmoke.mapper import StringToFunctionMapper
+from utils import crop
+from extractor.extract import HaralickFeatureExtractor
+from mapper import StringToFunctionMapper
 
 
 class LatencyCallback(object):
@@ -119,75 +120,87 @@ class Inference(object):
         cap = cv2.VideoCapture(video_path)
         annot = pd.read_csv(annot_path)
 
-        offset = 0
+        while not cap.isOpened():
+            cap = cv2.VideoCapture(video_path)
+            cv2.waitKey(10)
+            print("Waiting for video sequence to open...")
+        print("Video sequence opened.")
+
+        pos_frame = cap.get(cv2.CAP_PROP_POS_FRAMES)
         while True:
             # Capture frame-by-frame
             ret, frame = cap.read()
             if not ret:
-                offset += 1
-                continue
-            annot_this_offset = annot[annot['counter'] == offset]
-            if len(annot_this_offset) == 0:
-                offset += 1
-                continue
-            # Convert frame to the correct colour space
-            colour_mapper = self.str_mapper.map(
-                mapper_type="cv2.cvtColor",
-                to_map=f"bgr2{self.data_colour_space.lower()}"
-            )
-            frame = cv2.cvtColor(frame, colour_mapper)
-            # Process each ROI for this offset value
-            total_frame_latency = 0.0
-            for roi in range(len(annot_this_offset)):
-                roi_uuid = str(uuid.uuid4())
-                # COMP TIME LATENCY MEASURE
-                comp_time_latency = LatencyCallback()
-                comp_time_latency.on_start()
-                is_empty, frame_cropped = crop(
-                    arr=frame,
-                    xmin=annot_this_offset.iloc[roi]['min_x'],
-                    ymin=annot_this_offset.iloc[roi]['min_y'],
-                    xmax=annot_this_offset.iloc[roi]['max_x'],
-                    ymax=annot_this_offset.iloc[roi]['max_y']
+                cap.set(cv2.CAP_PROP_POS_FRAMES, pos_frame-1)
+                print("Frame is not ready. Retrying...")
+                cv2.waitKey(10)
+            else:
+                pos_frame = cap.get(cv2.CAP_PROP_POS_FRAMES)
+                annot_this_offset = annot[annot['counter'] == pos_frame]
+                if len(annot_this_offset) == 0:
+                    continue
+                # Convert frame to the correct colour space
+                colour_mapper = self.str_mapper.map(
+                    mapper_type="cv2.cvtColor",
+                    to_map=f"bgr2{self.data_colour_space.lower()}"
                 )
-                feature_extractor = HaralickFeatureExtractor(colour_space=self.data_colour_space)
-                feature_vector = torch.tensor(feature_extractor.create_feature_vector(
-                    image_array=frame_cropped).values)
-                # Standardise the feature vector
-                feature_vector = (feature_vector - inference_mean) / inference_stdev
-                feature_vector = feature_vector.type(self.torch_dtype)
-                comp_time_latency.on_end()
-                total_frame_latency += comp_time_latency.latency_ms
+                frame = cv2.cvtColor(frame, colour_mapper)
+                # Process each ROI for this offset value
+                total_frame_latency = 0.0
+                for roi in range(len(annot_this_offset)):
+                    roi_uuid = str(uuid.uuid4())
+                    # COMP TIME LATENCY MEASURE
+                    comp_time_latency = LatencyCallback()
+                    comp_time_latency.on_start()
+                    is_empty, frame_cropped = crop(
+                        arr=frame,
+                        xmin=annot_this_offset.iloc[roi]['min_x'],
+                        ymin=annot_this_offset.iloc[roi]['min_y'],
+                        xmax=annot_this_offset.iloc[roi]['max_x'],
+                        ymax=annot_this_offset.iloc[roi]['max_y']
+                    )
+                    feature_extractor = HaralickFeatureExtractor(colour_space=self.data_colour_space)
+                    feature_vector = torch.tensor(feature_extractor.create_feature_vector(
+                        image_array=frame_cropped).values)
+                    # Standardise the feature vector
+                    feature_vector = (feature_vector - inference_mean) / inference_stdev
+                    feature_vector = feature_vector.type(self.torch_dtype)
+                    comp_time_latency.on_end()
+                    total_frame_latency += comp_time_latency.latency_ms
 
-                self.model.eval()
-                with torch.no_grad():
-                    feature_vector_device = feature_vector.to(self.device)
-                    inf_latency = LatencyCallback()
-                    inf_latency.on_start()
-                    pred = self.model(feature_vector_device)
-                    pred = torch.argmax(pred).item()
-                    inf_latency.on_end()
-                    total_frame_latency += inf_latency.latency_ms
+                    self.model.eval()
+                    with torch.no_grad():
+                        feature_vector_device = feature_vector.to(self.device)
+                        inf_latency = LatencyCallback()
+                        inf_latency.on_start()
+                        pred = self.model(feature_vector_device)
+                        pred = torch.argmax(pred).item()
+                        inf_latency.on_end()
+                        total_frame_latency += inf_latency.latency_ms
 
-                # Store and export results
-                self.out_data["img_uuid"].append(roi_uuid)
-                self.out_data["pred_label"].append(self.classes[pred])
-                self.out_data["comp_time_ms"].append(comp_time_latency.latency_ms)
-                self.out_data["inference_time_ms"].append(inf_latency.latency_ms)
-                self.export_roi(frame_cropped, roi_uuid, self.classes[pred])
+                    # Store and export results
+                    self.out_data["img_uuid"].append(roi_uuid)
+                    self.out_data["pred_label"].append(self.classes[pred])
+                    self.out_data["comp_time_ms"].append(comp_time_latency.latency_ms)
+                    self.out_data["inference_time_ms"].append(inf_latency.latency_ms)
+                    self.export_roi(frame_cropped, roi_uuid, self.classes[pred])
 
-                if verbose and (verbose > 0):
-                    print(f"ROI ID: {roi_uuid}, Prediction: {self.classes[pred]}, "
-                          f"Comp latency: {comp_time_latency.latency_ms:.2f}ms, "
-                          f"Inf latency: {inf_latency.latency_ms:.2f}ms")
+                    if verbose and (verbose > 0):
+                        print(f"ROI ID: {roi_uuid}, Prediction: {self.classes[pred]}, "
+                              f"Comp latency: {comp_time_latency.latency_ms:.2f}ms, "
+                              f"Inf latency: {inf_latency.latency_ms:.2f}ms")
 
-            for _ in range(len(annot_this_offset)):
-                self.out_data["total_time_ms"].append(total_frame_latency)
-            offset += 1
+                for _ in range(len(annot_this_offset)):
+                    self.out_data["total_time_ms"].append(total_frame_latency)
+
+            if cap.get(cv2.CAP_PROP_POS_FRAMES) == cap.get(cv2.CAP_PROP_FRAME_COUNT):
+                break
 
         return
 
     def export_roi(self, arr: np.ndarray, roi_uuid: str, pred: str) -> None:
+        if not os.path.exists(self.roi_out_path):
+            os.makedirs(self.roi_out_path)
         if self.data_colour_space not in ["RGB", "rgb"]:
             try:
                 cvt_rgb = self.str_mapper.map(

@@ -12,7 +12,7 @@ from sklearn.preprocessing import StandardScaler, RobustScaler, MinMaxScaler, \
 from torch.utils.data import DataLoader, TensorDataset
 from torchsampler import ImbalancedDatasetSampler
 
-from base.base import BasePreprocessor
+from base import BasePreprocessor
 
 
 class NeuralNetworkPreprocessor(BasePreprocessor):

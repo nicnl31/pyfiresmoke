@@ -16,8 +16,8 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score
 
 from training.preprocessing import NeuralNetworkPreprocessor
 from training.training import NeuralNetworkTrainer
-from ANSCVProject.ANSCVProject.pyfiresmoke.plotting import NeuralNetworkPlotter
-from ANSCVProject.ANSCVProject.pyfiresmoke.utils import parse, NumpyEncoder
+from plotting import NeuralNetworkPlotter
+from utils import parse, NumpyEncoder
 
 # ==============================================================================
 # MODEL IMPORTS GO HERE

@@ -5,8 +5,8 @@ from models.ann import ANN
 
 # ==============================================================================
 # Change inference file paths here
-COLOUR_SPACE = "HSV"  # <-- CHANGE THIS
-ROI_OUT_PATH = "inference/inference1/inference1_rois_hsv"  # <-- CHANGE THIS
+COLOUR_SPACE = "RGB"  # <-- CHANGE THIS
+ROI_OUT_PATH = "inference/inference1/inference1_rois_rgb"  # <-- CHANGE THIS
 VIDEO_PATH = "inference/inference1/inference1.mp4"  # <-- CHANGE THIS
 ANNOT_PATH = "inference/inference1/inference1.csv"  # <-- CHANGE THIS
 CSV_OUT_DIR = "inference/inference1/inference_csv"  # <-- CHANGE THIS
@@ -16,12 +16,12 @@ CSV_OUT_DIR = "inference/inference1/inference_csv"  # <-- CHANGE THIS
 # ==============================================================================
 # Change model path and args here
 MODEL_SAVE_NUMBER = "1"  # <-- CHANGE THIS
-MODEL_SAVE_NAME = "ANN_ep87.pt"  # <-- CHANGE THIS
+MODEL_SAVE_NAME = "ANN_ep8.pt"  # <-- CHANGE THIS
 MODEL_CLASS = ANN
 
-MODEL_INFERENCE_PARAMS_PATH = f"results/final_model{MODEL_SAVE_NUMBER}/inference_params.json"
-MODEL_WEIGHT_PATH = f"results/final_model{MODEL_SAVE_NUMBER}/{MODEL_SAVE_NAME}"
-MODEL_CONFIG_PATH = f"results/cv_checkpoints{MODEL_SAVE_NUMBER}"
+MODEL_INFERENCE_PARAMS_PATH = f"results/final_model_{COLOUR_SPACE.lower()}{MODEL_SAVE_NUMBER}/inference_params.json"
+MODEL_WEIGHT_PATH = f"results/final_model_{COLOUR_SPACE.lower()}{MODEL_SAVE_NUMBER}/{MODEL_SAVE_NAME}"
+MODEL_CONFIG_PATH = f"results/cv_checkpoints_{COLOUR_SPACE.lower()}{MODEL_SAVE_NUMBER}"
 with open(f"{MODEL_CONFIG_PATH}/best_config.json", mode='r') as f:
 	BEST_CONFIG = json.load(f)
 

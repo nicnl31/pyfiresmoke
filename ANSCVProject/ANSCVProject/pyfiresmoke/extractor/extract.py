@@ -18,7 +18,6 @@ from PIL import Image
 import numpy as np
 import pandas as pd
 
-from features.lbp import LocalBinaryPatterns
 from features.glcm import GLCM
 
 

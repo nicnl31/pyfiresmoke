@@ -22,11 +22,11 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import StandardScaler, RobustScaler, MinMaxScaler, \
 	MaxAbsScaler
 
-from base.base import BaseValidator, BaseSaver
-from training.training import NeuralNetworkTrainer
-from training.preprocessing import NeuralNetworkPreprocessor
-from plotting.plotting import NeuralNetworkPlotter
-from utils.utils import list_argmax, list_argmin, NumpyEncoder
+from base import BaseValidator, BaseSaver
+from .training import NeuralNetworkTrainer
+from .preprocessing import NeuralNetworkPreprocessor
+from plotting import NeuralNetworkPlotter
+from utils import list_argmax, list_argmin, NumpyEncoder
 
 
 class NeuralNetworkCVSaver(BaseSaver):
