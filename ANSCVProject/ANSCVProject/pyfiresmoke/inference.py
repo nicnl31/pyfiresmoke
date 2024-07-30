@@ -32,6 +32,7 @@ import matplotlib.pyplot as plt
 from utils import crop
 from extractor.extract import HaralickFeatureExtractor
 from mapper import StringToFunctionMapper
+from utils import create_dir_if_not_exists
 
 
 class LatencyCallback(object):
@@ -123,19 +124,32 @@ class Inference(object):
         while not cap.isOpened():
             cap = cv2.VideoCapture(video_path)
             cv2.waitKey(10)
-            print("Waiting for video sequence to open...")
-        print("Video sequence opened.")
+            if verbose and verbose > 0:
+                print("Waiting for video sequence to open...")
+        if verbose and verbose > 0:
+            print("Video sequence opened.")
 
         pos_frame = cap.get(cv2.CAP_PROP_POS_FRAMES)
-        while True:
+        total_frame_count = cap.get(cv2.CAP_PROP_FRAME_COUNT)
+        while cap.isOpened():
             # Capture frame-by-frame
             ret, frame = cap.read()
             if not ret:
                 cap.set(cv2.CAP_PROP_POS_FRAMES, pos_frame-1)
-                print("Frame is not ready. Retrying...")
+                if verbose and verbose > 0:
+                    print("Frame is not ready. Retrying...")
                 cv2.waitKey(10)
-            else:
+            elif ret:
                 pos_frame = cap.get(cv2.CAP_PROP_POS_FRAMES)
+                if verbose and verbose > 0:
+                    print(f"Frame {pos_frame} of {total_frame_count}")
+                if pos_frame == total_frame_count:
+                    self.export_inference_data()
+                    if verbose and verbose > 0:
+                        print(f"Finished inference: {len(self.out_data)} ROIs "
+                              f"saved to {self.csv_out_dir}/inference_results."
+                              f"csv).")
+                    break
                 annot_this_offset = annot[annot['counter'] == pos_frame]
                 if len(annot_this_offset) == 0:
                     continue
@@ -192,15 +206,12 @@ class Inference(object):
 
                 for _ in range(len(annot_this_offset)):
                     self.out_data["total_time_ms"].append(total_frame_latency)
-
-            if cap.get(cv2.CAP_PROP_POS_FRAMES) == cap.get(cv2.CAP_PROP_FRAME_COUNT):
-                break
-
+        cap.release()
+        cv2.destroyAllWindows()
         return
 
     def export_roi(self, arr: np.ndarray, roi_uuid: str, pred: str) -> None:
-        if not os.path.exists(self.roi_out_path):
-            os.makedirs(self.roi_out_path)
+        create_dir_if_not_exists(self.roi_out_path)
         if self.data_colour_space not in ["RGB", "rgb"]:
             try:
                 cvt_rgb = self.str_mapper.map(
@@ -220,5 +231,6 @@ class Inference(object):
 
     def export_inference_data(self):
         df = pd.DataFrame(self.out_data)
+        create_dir_if_not_exists(self.csv_out_dir)
         df.to_csv(f"{self.csv_out_dir}/inference_results.csv",
                   encoding='utf-8', index=False, header=True)

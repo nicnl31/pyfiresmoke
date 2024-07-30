@@ -11,6 +11,12 @@ import pandas as pd
 import cv2
 
 
+def create_dir_if_not_exists(path: str) -> None:
+	if not os.path.exists(path):
+		os.makedirs(path)
+	return
+
+
 def to_array(image: Image):
 	return np.array(image)
 
