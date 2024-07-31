@@ -15,8 +15,8 @@ CSV_OUT_DIR = "inference/inference1/inference_csv"  # <-- CHANGE THIS
 
 # ==============================================================================
 # Change model path and args here
-MODEL_SAVE_NUMBER = "1"  # <-- CHANGE THIS
-MODEL_SAVE_NAME = "ANN_ep8.pt"  # <-- CHANGE THIS
+MODEL_SAVE_NUMBER = "2"  # <-- CHANGE THIS
+MODEL_SAVE_NAME = "ANN_ep105.pt"  # <-- CHANGE THIS
 MODEL_CLASS = ANN
 
 MODEL_INFERENCE_PARAMS_PATH = f"results/final_model_{COLOUR_SPACE.lower()}{MODEL_SAVE_NUMBER}/inference_params.json"

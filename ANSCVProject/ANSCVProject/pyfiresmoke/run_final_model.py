@@ -24,8 +24,8 @@ from utils import parse, NumpyEncoder
 from models.ann import ANN
 
 # MODEL HYPERPARAMETER SETTINGS: Specify model save path and kwargs path
-SAVE_PATH = "results/final_model_rgb1"
-MODEL_CONFIG_PATH = "results/cv_checkpoints_rgb1"
+SAVE_PATH = "results/final_model_rgb2"
+MODEL_CONFIG_PATH = "results/cv_checkpoints_rgb2"
 with open(f"{MODEL_CONFIG_PATH}/best_config.json", mode='r') as f:
 	BEST_CONFIG = json.load(f)
 

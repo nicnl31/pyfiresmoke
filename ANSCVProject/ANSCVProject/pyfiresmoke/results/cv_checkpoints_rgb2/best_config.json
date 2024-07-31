@@ -1,0 +1,17 @@
+{
+    "model_id": "5765bb09-ae36-4c02-aa71-63bec58047c1",
+    "kwargs": {
+        "input_size": 12,
+        "output_size": 3,
+        "hidden_size": 12,
+        "dropout_rate": 0.1,
+        "n_hiddens": 2,
+        "activation_function": "silu"
+    },
+    "optimal_n_epochs": 106,
+    "train_params": {
+        "lr": 0.001,
+        "batch_size": 128,
+        "random_state": 42
+    }
+}
