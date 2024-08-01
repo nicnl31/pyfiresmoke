@@ -144,9 +144,9 @@ class Inference(object):
                 if verbose and verbose > 0:
                     print(f"Frame {pos_frame} of {total_frame_count}")
                 if pos_frame == total_frame_count:
-                    self.export_inference_data()
+                    len_data = self.export_inference_data()
                     if verbose and verbose > 0:
-                        print(f"Finished inference: {len(self.out_data)} ROIs "
+                        print(f"Finished inference: {len_data} ROIs "
                               f"saved to {self.csv_out_dir}/inference_results."
                               f"csv).")
                     break
@@ -229,8 +229,9 @@ class Inference(object):
                     bbox_inches='tight')
         return
 
-    def export_inference_data(self):
+    def export_inference_data(self) -> int:
         df = pd.DataFrame(self.out_data)
         create_dir_if_not_exists(self.csv_out_dir)
         df.to_csv(f"{self.csv_out_dir}/inference_results.csv",
                   encoding='utf-8', index=False, header=True)
+        return len(df)

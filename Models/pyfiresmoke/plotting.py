@@ -2,6 +2,7 @@ from typing import Any
 
 import matplotlib.pyplot as plt
 from sklearn.metrics import ConfusionMatrixDisplay
+
 from base import BasePlotter, BaseSaver
 
 

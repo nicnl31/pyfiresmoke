@@ -1,15 +1,18 @@
 import json
 
-from ANSCVProject.ANSCVProject.pyfiresmoke.inference import Inference
+from inference import Inference
 from models.ann import ANN
 
 # ==============================================================================
-# Change inference file paths here
+# Change colour space of the dataset here
 COLOUR_SPACE = "RGB"  # <-- CHANGE THIS
-ROI_OUT_PATH = "inference/inference1/inference1_rois_rgb"  # <-- CHANGE THIS
-VIDEO_PATH = "inference/inference1/inference1.mp4"  # <-- CHANGE THIS
-ANNOT_PATH = "inference/inference1/inference1.csv"  # <-- CHANGE THIS
-CSV_OUT_DIR = "inference/inference1/inference_csv"  # <-- CHANGE THIS
+
+# Change inference file paths here
+ROI_OUT_PATH = "results/inference_results_rgb2/nofire_2_rois"  # <-- CHANGE THIS
+CSV_OUT_DIR = "results/inference_results_rgb2/nofire_2_csv"  # <-- CHANGE THIS
+
+VIDEO_PATH = "/Users/nicholasle/Desktop/Work/ANS CENTER/fire-detection/FireDetection/Resources/Inference/nofire_2.m4v"  # <-- CHANGE THIS
+ANNOT_PATH = "/Users/nicholasle/Desktop/Work/ANS CENTER/fire-detection/FireDetection/Resources/Inference/nofire_2.csv"  # <-- CHANGE THIS
 # ==============================================================================
 
 
