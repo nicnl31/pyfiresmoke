@@ -41,7 +41,7 @@ int FireDetectionTest() {
     boost::property_tree::ptree detectionObjects;
     boost::property_tree::ptree pt;
    
-    std::string videoFilePath = "C:\\Projects\\ANSCV\\Resources\\demo.mp4";
+    std::string videoFilePath = "C:\\Projects\\ANSCV\\Resources\\fire_4.mp4";
     std::string result;
     ANSCENTER::ANSFireDetector* infHandle;
     int createResult = CreateANSFireDetectorHandle(&infHandle,0.6);
