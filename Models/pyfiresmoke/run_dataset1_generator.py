@@ -6,7 +6,7 @@ from extractor.dataset import Dataset
 
 
 if __name__ == "__main__":
-	dataset_dir = 'data/dataset1'
+	dataset_dir = '../../data/dataset1'
 	names = [Path(x).stem for x in glob.glob(f"{dataset_dir}/*.jpg")]
 	dataset = Dataset(dir=dataset_dir)
 	for name in names:

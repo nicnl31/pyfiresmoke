@@ -8,7 +8,7 @@ from extractor.dataset import Dataset
 warnings.filterwarnings("ignore")
 
 if __name__ == "__main__":
-	dataset_dir = 'data/fasdd_dataset'
+	dataset_dir = '../../data/fasdd_dataset'
 	image_dir = 'images'
 	annot_dir = 'annotations/YOLO_CV/labels'
 	csv_dir = 'csv'

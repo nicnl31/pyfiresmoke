@@ -40,7 +40,7 @@ torch.manual_seed(RANDOM_STATE)
 MODEL = ANN(**MODEL_KWARGS)
 
 # DATASET VARIABLES: CHANGE AS NEEDED
-dataset_dir = 'data'  # <-- Change this as needed
+dataset_dir = '../../data'  # <-- Change this as needed
 dataset_name = 'fasdd_dataset'  # <-- Change this as needed
 df_name = 'csv/dataset_fasdd_no_lbp_RGB.csv'  # <-- Change this as needed
 split_dir = 'annotations/YOLO_CV'
