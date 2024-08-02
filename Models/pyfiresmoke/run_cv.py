@@ -52,7 +52,7 @@ df_name = 'csv/dataset_fasdd_no_lbp_RGB.csv'  # <-- Change this as needed
 split_dir = 'annotations/YOLO_CV'
 train_filename = 'train.txt'
 val_filename = 'val.txt'
-cv_path = './results/cv_checkpoints_rgb'
+cv_path = '../../results/cv_checkpoints_rgb'
 
 # CHANGE MODEL HERE
 MODEL = ANN  # <-- Change this as needed
