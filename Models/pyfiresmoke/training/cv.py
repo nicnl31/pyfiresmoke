@@ -14,11 +14,13 @@ import uuid
 import json
 from typing import Type, Tuple
 
+
 import numpy as np
 import pandas as pd
 import torch
+import sklearn
 from torch import nn
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import StratifiedKFold, GridSearchCV, RandomizedSearchCV
 from sklearn.preprocessing import StandardScaler, RobustScaler, MinMaxScaler, \
 	MaxAbsScaler
 
@@ -230,7 +232,7 @@ class NeuralNetworkCrossValidator(BaseValidator):
 			# )
 
 			if self.verbose and self.verbose > 0:
-				print(f"\nTraining and validating for split {i+1}...")
+				print(f"\n[SPLIT {i+1}/{self.n_splits}] Model config: {model_kwargs}...")
 
 			# 3.   TRAIN-EVAL: From the dataloaders for this split
 			nn_trainer.train(train_data=dataloader_train, val_data=dataloader_val)
@@ -397,3 +399,114 @@ class NeuralNetworkCrossValidator(BaseValidator):
 		optimal_n_epochs = split_results[f'split{best_split}']['optimal_n_epochs']
 
 		return best_train_scores_list, best_val_scores_list, optimal_n_epochs
+
+
+class MLCrossValidator(BaseValidator):
+	"""
+	The ML cross validator stores cross-validation results for all models and
+	all splits. The main attribute of the object, cv_results_, for k models with
+	n splits each, has the following structure:
+
+	self.cv_results_ = {
+
+		'model1_name': {
+			'model_kwargs': {...},
+			'split_results': {
+				'split1': {
+					'train_scores': [...],
+					'val_scores': [...]
+				},
+				...
+				'splitn': {
+					'train_scores': [...],
+					'val_scores': [...]
+				}
+			},
+			'best_split_results': {
+				'best_train_scores': [train_score1, ..., train_scoren],
+				'best_val_scores': [val_score1, ..., val_scoren]
+			},
+			'avg_results': {
+				'avg_train_score': [train_score1, ..., train_scoren] / n,
+				'avg_val_score': [val_score1, ..., val_scoren] / n
+			},
+			'optimal_n_epochs': optimal_n_epochs
+		},
+		...
+		...
+		'modelk_name': {
+			'model_kwargs': {...},
+			'split_results': {
+				'split1': {
+					'train_scores': [...],
+					'val_scores': [...]
+				},
+				...
+				'splitn': {
+					'train_scores': [...],
+					'val_scores': [...]
+				}
+			},
+			'best_split_results': {
+				'train_scores': [train_score1, ..., train_scoren],
+				'val_scores': [val_score1, ..., val_scoren]
+			},
+			'avg_results': {
+				'train_scores': [train_score1, ..., train_scoren] / n,
+				'val_scores': [val_score1, ..., val_scoren] / n
+			},
+			'optimal_n_epochs': optimal_n_epochs
+		}
+	}
+	"""
+	def __init__(
+			self,
+			n_splits: int,
+			shuffle: bool,
+			scoring_method: str = 'max',
+			random_state: int = 42,
+			cv_path: str = "./cv_checkpoints",
+			verbose: int or None = 1
+	):
+		assert scoring_method in ['min', 'max'], (f"scoring_method must be one "
+												  f"of ['min', 'max']. It is "
+												  f"currently set to be "
+												  f"{scoring_method}.")
+		super(MLCrossValidator, self).__init__(
+			n_splits=n_splits,
+			shuffle=shuffle,
+			random_state=random_state
+		)
+		self.cv_path: str = cv_path
+		self.scoring_method = scoring_method
+		self.cv_results_: dict = {}
+		self.verbose: int or None = verbose
+
+	def cross_validate(
+			self, 
+			model: Type[sklearn.base.BaseEstimator],
+			param_dict: dict,
+			scoring: str="accuracy",
+			randomized: bool=True,
+			random_state: int=42,
+			**kwargs
+	) -> None:
+		searcher = None
+		if randomized:
+			searcher = RandomizedSearchCV(
+				estimator=model,
+				param_distributions=param_dict,
+				scoring=scoring,
+				cv=self.n_splits,
+				random_state=random_state,
+				**kwargs
+			)
+		else:
+			searcher = GridSearchCV(
+				estimator=model,
+				param_grid=param_dict,
+				scoring=scoring,
+				cv=self.n_splits,
+				**kwargs
+			)
+		return 

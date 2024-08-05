@@ -37,7 +37,7 @@ class NeuralNetworkPreprocessor(BasePreprocessor):
 		df_copy = df.copy()
 
 		# Separate the data, label, and image names
-		y = df_copy.pop('label')
+		y = df_copy.pop('target')
 		img = df_copy.pop('image')
 		X = df_copy
 

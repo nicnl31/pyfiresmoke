@@ -48,11 +48,11 @@ from models.ann import ANN
 # DATASET VARIABLES: CHANGE AS NEEDED
 dataset_dir = '../../data'  # <-- Change this as needed
 dataset_name = 'fasdd_dataset'  # <-- Change this as needed
-df_name = 'csv/dataset_fasdd_no_lbp_RGB.csv'  # <-- Change this as needed
+df_name = 'csv/dataset_fasdd_no_lbp_HSV_60features.csv'  # <-- Change this as needed
 split_dir = 'annotations/YOLO_CV'
 train_filename = 'train.txt'
 val_filename = 'val.txt'
-cv_path = '../../results/cv_checkpoints_rgb'
+cv_path = '../../results/cv_checkpoints_hsv_60features'
 
 # CHANGE MODEL HERE
 MODEL = ANN  # <-- Change this as needed
@@ -61,9 +61,9 @@ MODEL = ANN  # <-- Change this as needed
 RANDOM_STATE = 42
 N_RANDOM_DRAWS = 50
 
-HIDDEN_SIZES = list(range(8, 19))
+HIDDEN_SIZES = list(range(16, 61))
 N_HIDDENS = list(range(1, 4))
-DROPOUT_RATES = [0.0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3]
+DROPOUT_RATES = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5]
 ACTIVATION_FUNCTIONS = ["relu", "prelu", "silu", "selu", "tanh", "relu6", "hardswish"]
 LRS = [1e-2, 1e-3, 1e-4]
 BATCH_SIZES = [64, 128, 256]
@@ -95,7 +95,8 @@ random.seed(RANDOM_STATE)
 n_epochs = random.choices(N_EPOCHS, k=N_RANDOM_DRAWS)
 # ==============================================================================
 
-if __name__ == "__main__":
+
+def main():
 	df = pd.read_csv(f"{dataset_dir}/{dataset_name}/{df_name}")
 
 	train_split = parse(dataset_dir, dataset_name, split_dir, train_filename)
@@ -116,7 +117,7 @@ if __name__ == "__main__":
 		nn_cv.cross_validate(
 			model=MODEL,
 			model_kwargs={
-				"input_size": 12,
+				"input_size": 60,
 				"output_size": 3,
 				"hidden_size": hidden_sizes[d],
 				"dropout_rate": dropout_rates[d],
@@ -133,3 +134,7 @@ if __name__ == "__main__":
 			scaler=StandardScaler
 		)
 	nn_cv.get_best_model_from_cv()
+
+
+if __name__ == "__main__":
+	main()

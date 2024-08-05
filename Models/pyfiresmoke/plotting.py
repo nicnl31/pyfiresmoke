@@ -41,16 +41,16 @@ class NeuralNetworkPlotter(BasePlotter):
 		plt.legend()
 		plt.savefig(f"{self.saver.save_path}/learning_curve.png")
 
-	def plot_confusion_matrix(self, y_true, y_pred, normalize='true') -> None:
+	def plot_confusion_matrix(self, y_true, y_pred, normalize='true', extra_stats: str="") -> None:
 		mtx = ConfusionMatrixDisplay.from_predictions(
 			y_true=y_true,
 			y_pred=y_pred,
 			normalize=normalize
 		)
 		if normalize == 'true':
-			mtx.figure_.suptitle(f"Normalised confusion matrix")
+			mtx.figure_.suptitle(f"Normalised confusion matrix\n{extra_stats}")
 			plt.savefig(f"{self.saver.save_path}/confusion_matrix_norm.png")
 		if normalize is None:
-			mtx.figure_.suptitle(f"Confusion matrix")
+			mtx.figure_.suptitle(f"Confusion matrix\n{extra_stats}")
 			plt.savefig(f"{self.saver.save_path}/confusion_matrix.png")
 		return

@@ -118,17 +118,19 @@ def main() -> None:
 		best_model_path=trainer.model_saver.get_best_model_path()
 	)
 
-	plotter.plot_learning_curve(train_loss=trainer.train_loss_list)
-	plotter.plot_confusion_matrix(y_true=y_test, y_pred=y_pred,
-								  normalize='true')
-	plotter.plot_confusion_matrix(y_true=y_test, y_pred=y_pred,
-								  normalize=None)
-
 	# METRICS
 	accuracy = accuracy_score(y_test, y_pred)
 	precision = precision_score(y_test, y_pred, average="macro")
 	recall = recall_score(y_test, y_pred, average="macro")
-
+	clf_stats = f"acc:{accuracy:.2f}, prec: {precision:.2f}, rec: {recall:.2f}" 
+	
+	# PLOT
+	plotter.plot_learning_curve(train_loss=trainer.train_loss_list)
+	plotter.plot_confusion_matrix(y_true=y_test, y_pred=y_pred,
+								  normalize='true', extra_stats=clf_stats)
+	plotter.plot_confusion_matrix(y_true=y_test, y_pred=y_pred,
+								  normalize=None, extra_stats=clf_stats)
+	
 	print(f"\nAccuracy: {accuracy:.2f}\n"
 		  f"Precision: {precision:.2f}\n"
 		  f"Recall: {recall:.2f}")
