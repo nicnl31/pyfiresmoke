@@ -223,7 +223,7 @@ class Dataset(object):
 				feature_vector = feature_extractor.create_feature_vector(
 					image_array=each_roi[1]
 				)
-				feature_vector['label'] = each_roi[0]
+				feature_vector['target'] = each_roi[0]
 				feature_vector['image'] = image_name
 				self.data.append(feature_vector)
 			else:
@@ -241,5 +241,6 @@ class Dataset(object):
 	def export_data(self, filename: str) -> None:
 		dataset_full = self.to_dataframe()
 		dataset_full.to_csv(filename, encoding='utf-8', index=False)
-		print(f"Total ROIs found: {self.all_rois}. Exported {len(self.data)} ROIs to {os.getcwd()}/{filename}. Skipped {self.skipped_rois}.")
+		fullpath = f"{os.getcwd()}/{filename}"
+		print(f"Total ROIs found: {self.all_rois}. Exported {len(self.data)} ROIs to {os.path.abspath(fullpath)}. Skipped {self.skipped_rois}.")
 		return

@@ -7,7 +7,8 @@ from extractor.dataset import Dataset
 
 warnings.filterwarnings("ignore")
 
-if __name__ == "__main__":
+
+def main():
 	dataset_dir = '../../data/fasdd_dataset'
 	image_dir = 'images'
 	annot_dir = 'annotations/YOLO_CV/labels'
@@ -30,4 +31,8 @@ if __name__ == "__main__":
 				should_resize=False
 			)
 		# print(dataset.to_dataframe())
-		dataset.export_data(filename=f"{dataset_dir}/{csv_dir}/dataset_fasdd_no_lbp_{colour}.csv")
+		dataset.export_data(filename=f"{dataset_dir}/{csv_dir}/dataset_fasdd_no_lbp_{colour}_60features.csv")
+
+
+if __name__ == "__main__":
+	main()

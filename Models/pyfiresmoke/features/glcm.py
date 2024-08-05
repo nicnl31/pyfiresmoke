@@ -11,10 +11,10 @@ class GLCM(object):
 			self,
 			image_channel: np.ndarray,
 			distances: list[int] = [5],
-			angles: list[float] =[0.],
+			angles: list[float] =[0., np.pi/4., np.pi/2., 3.*np.pi/4.],
 			levels: int = 256,
-			symmetric: bool = True,
-			normed: bool = True
+			symmetric: bool = False,
+			normed: bool = False
 	) -> np.ndarray:
 		"""
 		Calculates the gray-level co-occurrence matrix for a given 2d image
@@ -56,5 +56,10 @@ class GLCM(object):
 			The string representing the channel of the image.
 		:return:
 		"""
-		self.props[f"{prop}_{self.channel}"] = graycoprops(glcm, prop=prop).ravel().item()
+		# Ravelled Numpy array of shape (distances*angles, )
+		feature_vector_arr = graycoprops(glcm, prop=prop).ravel()
+
+		# Append features to the self.props dictionary
+		for i in range(len(feature_vector_arr)):
+			self.props[f"{prop}{i+1}_channel{self.channel}"] = feature_vector_arr[i]
 		return

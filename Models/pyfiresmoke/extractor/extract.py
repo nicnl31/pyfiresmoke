@@ -28,7 +28,7 @@ class HaralickFeatureExtractor(object):
 			props: list[str] = None,
 	) -> None:
 		if not props:
-			self.props = ["energy", "homogeneity", "dissimilarity", "contrast"]
+			self.props = ["energy", "homogeneity", "dissimilarity", "contrast", "correlation"]
 		elif props:
 			self.props = props
 
@@ -38,12 +38,7 @@ class HaralickFeatureExtractor(object):
 			self,
 			image_array: np.ndarray,
 			# lbp_num_points: int = 8,
-			# lbp_radius: int = 1,
-			glcm_distances: list[int] = [5],
-			glcm_angles: list[float] = [0.],
-			glcm_levels: int = 256,
-			glcm_symmetric: bool = True,
-			glcm_normed: bool = True
+			# lbp_radius: int = 1
 	) -> pd.Series:
 		"""
 		Creates the feature vector from all Haralick texture features. The
@@ -78,30 +73,15 @@ class HaralickFeatureExtractor(object):
 		# Calculate GLCM matrix for each channel
 		glcm_channel_0_matx = glcm_channel_0.get_glcm(
 			# image_channel=lbp_channel_0,
-			image_channel=channel_0,
-			distances=glcm_distances,
-			angles=glcm_angles,
-			levels=glcm_levels,
-			symmetric=glcm_symmetric,
-			normed=glcm_normed
+			image_channel=channel_0
 		)
 		glcm_channel_1_matx = glcm_channel_1.get_glcm(
 			# image_channel=lbp_channel_1,
-			image_channel=channel_1,
-			distances=glcm_distances,
-			angles=glcm_angles,
-			levels=glcm_levels,
-			symmetric=glcm_symmetric,
-			normed=glcm_normed
+			image_channel=channel_1
 		)
 		glcm_channel_2_matx = glcm_channel_2.get_glcm(
 			# image_channel=lbp_channel_2,
-			image_channel=channel_2,
-			distances=glcm_distances,
-			angles=glcm_angles,
-			levels=glcm_levels,
-			symmetric=glcm_symmetric,
-			normed=glcm_normed
+			image_channel=channel_2
 		)
 
 		# Get property for each channel
