@@ -88,3 +88,15 @@ ANSCVProject/x64/Release/ANSCVProject.lib
 *.xml
 *.txt
 *.ipynb
+
+# MacOS related visual file
+.DS_Store
+
+# All inference results csv files
+inference_results.csv
+
+# FASDD dataset-related json files
+FASDD_CV_TDML.json
+test.json
+train.json
+val.json
