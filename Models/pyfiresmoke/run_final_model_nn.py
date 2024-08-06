@@ -24,8 +24,8 @@ from utils import parse, NumpyEncoder
 from models.ann import ANN
 
 # MODEL HYPERPARAMETER SETTINGS: Specify model save path and kwargs path
-SAVE_PATH = "../../results/final_model_rgb2"
-MODEL_CONFIG_PATH = "../../results/cv_checkpoints_rgb2"
+SAVE_PATH = "../../results/final_models/final_model_hsv_60features1"  # <-- Change this as needed 
+MODEL_CONFIG_PATH = "../../results/cv/cv_checkpoints_hsv_60features1"  # <-- Change this as needed 
 with open(f"{MODEL_CONFIG_PATH}/best_config.json", mode='r') as f:
 	BEST_CONFIG = json.load(f)
 
@@ -42,7 +42,7 @@ MODEL = ANN(**MODEL_KWARGS)
 # DATASET VARIABLES: CHANGE AS NEEDED
 dataset_dir = '../../data'  # <-- Change this as needed
 dataset_name = 'fasdd_dataset'  # <-- Change this as needed
-df_name = 'csv/dataset_fasdd_no_lbp_RGB.csv'  # <-- Change this as needed
+df_name = 'csv/dataset_fasdd_no_lbp_HSV_60features.csv'  # <-- Change this as needed
 split_dir = 'annotations/YOLO_CV'
 train_filename = 'train.txt'
 val_filename = 'val.txt'

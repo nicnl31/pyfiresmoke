@@ -188,6 +188,7 @@ class Inference(object):
                         inf_latency = LatencyCallback()
                         inf_latency.on_start()
                         pred = self.model(feature_vector_device)
+                        pred_softmax = torch.softmax(pred, dim=0)
                         pred = torch.argmax(pred).item()
                         inf_latency.on_end()
                         total_frame_latency += inf_latency.latency_ms
@@ -197,7 +198,10 @@ class Inference(object):
                     self.out_data["pred_label"].append(self.classes[pred])
                     self.out_data["comp_time_ms"].append(comp_time_latency.latency_ms)
                     self.out_data["inference_time_ms"].append(inf_latency.latency_ms)
-                    self.export_roi(frame_cropped, roi_uuid, self.classes[pred])
+                    self.export_roi(arr=frame_cropped, 
+                                    roi_uuid=roi_uuid, 
+                                    pred=self.classes[pred],
+                                    softmax_vec=pred_softmax)
 
                     if verbose and (verbose > 0):
                         print(f"ROI ID: {roi_uuid}, Prediction: {self.classes[pred]}, "
@@ -210,7 +214,13 @@ class Inference(object):
         cv2.destroyAllWindows()
         return
 
-    def export_roi(self, arr: np.ndarray, roi_uuid: str, pred: str) -> None:
+    def export_roi(
+            self, 
+            arr: np.ndarray, 
+            roi_uuid: str, 
+            pred: str, 
+            softmax_vec: torch.tensor
+            ) -> None:
         create_dir_if_not_exists(self.roi_out_path)
         if self.data_colour_space not in ["RGB", "rgb"]:
             try:
@@ -223,8 +233,15 @@ class Inference(object):
                 raise KeyError(f"Mapping {self.data_colour_space.lower()}2rgb "
                                f"not found in the StringToFunctionMapper class."
                                f" Please add to it and try again.")
+        
+        # EXTRACT PROBABILITY OF FIRE/SMOKE/NEITHER
+        fire_prob = softmax_vec[0].item()
+        smoke_prob = softmax_vec[1].item()
+        neither_prob = softmax_vec[2].item()
+
+        # VISUALISE ROI
         plt.imshow(arr)
-        plt.title(f"prediction:{pred}")
+        plt.title(f"prediction:{pred}\n{fire_prob:.2f}fire, {smoke_prob:.2f}smoke, {neither_prob:.2f}neither")
         plt.savefig(f"{self.roi_out_path}/{roi_uuid}.jpg",
                     bbox_inches='tight')
         return

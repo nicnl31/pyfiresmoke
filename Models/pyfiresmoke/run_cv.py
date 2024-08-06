@@ -52,7 +52,7 @@ df_name = 'csv/dataset_fasdd_no_lbp_HSV_60features.csv'  # <-- Change this as ne
 split_dir = 'annotations/YOLO_CV'
 train_filename = 'train.txt'
 val_filename = 'val.txt'
-cv_path = '../../results/cv_checkpoints_hsv_60features'
+cv_path = '../../results/cv/cv_checkpoints_hsv_60features'
 
 # CHANGE MODEL HERE
 MODEL = ANN  # <-- Change this as needed
@@ -113,7 +113,7 @@ def main():
 		cv_path=cv_path
 	)
 	for d in range(N_RANDOM_DRAWS):
-		print(f"\n Starting iteration {d+1} of {N_RANDOM_DRAWS} for randomised cross-validation search.")
+		print(f"\n [ITER {d+1}/{N_RANDOM_DRAWS} RANDOMISED CV SEARCH]")
 		nn_cv.cross_validate(
 			model=MODEL,
 			model_kwargs={
