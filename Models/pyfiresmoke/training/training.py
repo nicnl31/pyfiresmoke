@@ -342,20 +342,30 @@ class NeuralNetworkTrainer(BaseTrainer):
 	def test(
 			self,
 			test_data: DataLoader,
-			best_model_path: str
+			best_model_path: str,
+			return_proba=True
 	) -> np.ndarray:
 		self.model.load_state_dict(torch.load(best_model_path, weights_only=True))
 		self.model.eval()
-		y_true_concat, y_pred_concat = torch.LongTensor(), torch.LongTensor()
+		y_true_concat = torch.LongTensor()
+		y_pred_concat = torch.LongTensor()
+		y_pred_proba_concat = torch.FloatTensor()
 		with torch.no_grad():
 			for X, y in test_data:
 				X_device = X.to(self.device)
 				y_device = y.to(self.device)
 
-				y_pred_device = self.model(X_device)
-				y_pred_device = torch.argmax(y_pred_device, dim=1)
+				y_pred_device_proba = self.model(X_device)
+				y_pred_device = torch.argmax(y_pred_device_proba, dim=1)
 
 				y_true_concat = torch.cat((y_true_concat, y_device))
 				y_pred_concat = torch.cat((y_pred_concat, y_pred_device))
-
-		return y_pred_concat.numpy()
+				y_pred_proba_concat = torch.cat((
+					y_pred_proba_concat, y_pred_device_proba
+				))
+		
+		y_pred_proba_concat = torch.softmax(y_pred_proba_concat, dim=1)
+		if return_proba:
+			return y_pred_concat.numpy(), y_pred_proba_concat.numpy()
+		else:
+			return y_pred_concat.numpy()

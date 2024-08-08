@@ -12,7 +12,8 @@ import numpy as np
 import pandas as pd
 import torch
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import accuracy_score, precision_score, recall_score
+from sklearn.metrics import (accuracy_score, precision_score, recall_score, 
+	roc_auc_score)
 
 from training.preprocessing import NeuralNetworkPreprocessor
 from training.training import NeuralNetworkTrainer
@@ -113,7 +114,7 @@ def main() -> None:
 
 	# EXECUTION
 	trainer.train_without_validation(train_data=dataloader_train)
-	y_pred = trainer.test(
+	y_pred, y_pred_proba = trainer.test(
 		test_data=dataloader_test,
 		best_model_path=trainer.model_saver.get_best_model_path()
 	)
@@ -122,7 +123,8 @@ def main() -> None:
 	accuracy = accuracy_score(y_test, y_pred)
 	precision = precision_score(y_test, y_pred, average="macro")
 	recall = recall_score(y_test, y_pred, average="macro")
-	clf_stats = f"acc:{accuracy:.2f}, prec: {precision:.2f}, rec: {recall:.2f}" 
+	auroc = roc_auc_score(y_test, y_pred_proba, multi_class="ovo")
+	clf_stats = f"acc:{accuracy:.4f}, prec: {precision:.4f}, rec: {recall:.4f}, auroc: {auroc:.4f}" 
 	
 	# PLOT
 	plotter.plot_learning_curve(train_loss=trainer.train_loss_list)
@@ -131,9 +133,11 @@ def main() -> None:
 	plotter.plot_confusion_matrix(y_true=y_test, y_pred=y_pred,
 								  normalize=None, extra_stats=clf_stats)
 	
-	print(f"\nAccuracy: {accuracy:.2f}\n"
-		  f"Precision: {precision:.2f}\n"
-		  f"Recall: {recall:.2f}")
+	print(f"\nAccuracy: {accuracy:.4f}\n"
+		  f"Precision: {precision:.4f}\n"
+		  f"Recall: {recall:.4f}\n"
+		  f"AUROC: {auroc:.4f}"
+	)
 
 	# SAVE PREPROCESSING PARAMETERS
 	inference_params = {
