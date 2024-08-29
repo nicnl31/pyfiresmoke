@@ -1,6 +1,6 @@
 import json
 
-from inference import Inference
+from inference import NeuralNetworkInference, MLInference
 from models.ann import ANN
 
 # ==============================================================================
@@ -39,7 +39,7 @@ INFERENCE_DEVICE = "cpu"  # <-- CHANGE THIS
 
 
 if __name__ == "__main__":
-	inference_runner = Inference(
+	inference_runner = NeuralNetworkInference(
 		model_class=MODEL_CLASS,
 		model_kwargs=MODEL_KWARGS,
 		model_weights_path=MODEL_WEIGHT_PATH,
