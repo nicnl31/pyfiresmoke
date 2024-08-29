@@ -87,6 +87,7 @@ ANSCVProject/x64/Release/ANSCVProject.lib
 *.xml
 *.txt
 *.ipynb
+*.csv
 
 # MacOS related visual file
 .DS_Store
