@@ -8,6 +8,12 @@ from typing import Any
 import pandas as pd
 
 
+class BaseInference(metaclass=ABCMeta):
+    @abstractmethod
+    def infer(self):
+        pass
+
+
 class BaseTrainer(metaclass=ABCMeta):
     """
     A base model trainer class. All model trainers, e.g. neural network trainer,
